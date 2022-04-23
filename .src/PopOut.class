@@ -1,0 +1,41 @@
+' Gambas class file
+
+Public iPopOut As Image
+
+Public Sub DisplayImage(iPOImage As Image, sName As String)
+
+  PictureBoxMain.Picture = iPOImage.Picture
+  PictureBoxMain.Mode = 3
+  Me.Title = sName
+
+End
+
+Public Sub ButtonsRotate_Click()
+
+  Dim iImage As Image = PictureBoxMain.Picture.Image
+
+  If Abs(Val(Last.Tag)) > 80 Then
+    iImage = iImage.Rotate(Rad(Last.Tag))
+    PictureBoxMain.Picture = iImage.Picture
+  End If
+
+End
+
+Public Sub PictureBoxMain_MouseDown()
+
+  If Mouse.state = 2 Then
+    HBoxPictureControl.Visible = True
+    If PictureBoxMain.Mode = 2 Then
+      PictureBoxMain.Mode = 3
+      Me.FullScreen = False
+    Else
+      HBoxPictureControl.Visible = False
+      PictureBoxMain.Mode = 2
+      Me.FullScreen = True
+    End If
+    Return
+  End If
+
+  Me.close
+
+End

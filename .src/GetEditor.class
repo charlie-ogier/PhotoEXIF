@@ -1,0 +1,117 @@
+' Gambas class file
+
+sDir As String[] = Dir("/usr/bin/", "*", gb.File).Sort()
+
+Public Sub Form_Open()
+
+  CheckBoxAll_Click
+  LocatedProgs
+
+End
+
+Public Sub TextBoxSearch_Change()
+
+  Dim iLoop, iRow As Integer
+
+  With GridViewDisplay
+    .Clear
+    .Columns.Count = 1
+    .Grid = False
+  End With
+
+  If Trim(TextBoxSearch.Text) = "" Then
+    GridViewDisplay.Rows.Count = sDir.Count
+    For iLoop = 0 To sDir.Max
+      GridViewDisplay[iLoop, 0].Text = UCase(sDir[iLoop])
+    Next
+  Else
+    For iLoop = 0 To sDir.Max
+      If InStr(UCase(sDir[iLoop]), UCase(TextBoxSearch.Text)) Then
+        Inc GridViewDisplay.Rows.Count
+        GridViewDisplay[iRow, 0].Text = UCase(sDir[iLoop])
+        Inc iRow
+      End If
+    Next
+  End If
+
+  LabelSelected.Text = ""
+  ButtonSelect.Enabled = False
+  TextBoxSearch.SetFocus
+
+End
+
+Public Sub LocatedProgs()
+
+  Dim sProgs As String[] = Split(File.Load(Application.Path &/ "EdList"), gb.NewLine, "", True)
+  Dim iLoop, iHit, iRow As Integer
+  Dim bNone As Boolean = True
+
+  With GridViewDisplay
+    .Clear
+    .Columns.Count = 1
+    .Grid = False
+  End With
+
+  For iLoop = 0 To sProgs.Max
+    iHit = sDir.Find(sProgs[iLoop], gb.IgnoreCase)
+    If iHit <> -1 Then
+      bNone = False
+      Inc GridViewDisplay.Rows.Count
+      GridViewDisplay[iRow, 0].Text = UCase(sDir[iHit])
+      Inc iRow
+    End If
+  Next
+
+  If bNone = True Then
+    Message.Warning("No suitable programs have been found, all programs will now be displayed", "OK")
+    CheckBoxAll.value = True
+    CheckBoxAll_Click
+  End If
+
+End
+
+Public Sub CheckBoxAll_Click()
+
+  TextBoxSearch.Clear
+  If CheckBoxAll.value = True Then
+    TextBoxSearch_Change
+    LabelMessage.Text = "Select program to use"
+    TextBoxSearch.Enabled = True
+  Else
+    LocatedProgs
+    LabelMessage.Text = "Showing suitable programs found on your computer - Select program to use"
+    TextBoxSearch.Enabled = False
+  End If
+
+  LabelSelected.Text = ""
+  ButtonSelect.Enabled = False
+
+End
+
+Public Sub GridViewDisplay_Click()
+
+  Dim sText As String
+  Dim iLoop As Integer
+
+  For iLoop = 0 To GridViewDisplay.Rows.Max
+    GridViewDisplay[iLoop, 0].Background = Color.Default
+  Next
+
+  ButtonSelect.Enabled = False
+  sText = GridViewDisplay[Last.Row, Last.Column].Text
+
+  If sText <> "" Then
+    GridViewDisplay[Last.Row, Last.Column].Background = Color.ButtonBackground
+    ButtonSelect.Enabled = True
+    LabelSelected.Text = sText
+  Endif
+
+End
+
+Public Sub ButtonSelect_Click()
+
+  Settings["editor"] = LCase(LabelSelected.Text)
+  Settings.Save
+  Me.Close
+
+End

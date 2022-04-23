@@ -1,0 +1,32 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,162,103)
+  Maximized = True
+  SkipTaskbar = True
+  Arrangement = Arrange.Vertical
+  { HBoxPictureControl HBox
+    MoveScaled(2,1,120,4)
+    { ToolButtonRotateL ToolButton ButtonsRotate
+      Name = "ToolButtonRotateL"
+      MoveScaled(0,0,4,4)
+      Tag = "90"
+      ToolTip = ("Rotate image -90 degrees")
+      Picture = Picture["icon:/22/rotate-left"]
+    }
+    { ToolButtonRotateR ToolButton ButtonsRotate
+      Name = "ToolButtonRotateR"
+      MoveScaled(4,0,4,4)
+      Tag = "-90"
+      ToolTip = ("Rotate image 90 degrees")
+      Picture = Picture["icon:/22/rotate-right"]
+    }
+  }
+  { PictureBoxMain PictureBox
+    MoveScaled(55,36,16,16)
+    Mouse = Mouse.Pointing
+    ToolTip = ("Click to close this window")
+    Expand = True
+    Alignment = Align.Center
+  }
+}

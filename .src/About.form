@@ -1,0 +1,47 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,119,67)
+  NoTabFocus = True
+  Icon = Picture["logo.png"]
+  SkipTaskbar = True
+  Arrangement = Arrange.Vertical
+  Padding = 5
+  { TextLabel1 TextLabel
+    MoveScaled(2,1,112,59)
+    Expand = True
+    Text = ("This program uses the excellent EXIFTool, written in Pearl, and gives it a GUI.<br>\nFeatures: Auto rotate, GPS location, histogram and various display options, use arrow keys to move up and down the files.<br>\nYou can resize most of the internal windows.<br>\nUsing the 'Common data' option will stop the Auto rotation and GPS features as the required data is not collected.<br>\nThe program will gather EXIF data in the background to speed up response times when moving from file to file.<br>\nYou can click on the main image to show it in a new window, click again to close.<p>\n\nThe problem of 'Your browser needs to be updated...' is due to not having QT5 installed. Try installing the following: -<br>\ngambas3-gb-qt5<br>\ngambas3-gb-qt5-ext<br>\ngambas3-gb-qt5-opengl<br>\ngambas3-gb-qt5-webkit<p>\n\nBugs or comments to bugs@cogier.com<p>\n\nGPL License<p>\n\nPhotoEXIF Copyright (c) 2019 Charlie Ogier with help from Matt Collins<p>\n\nThis program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as  published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.<p>\n\nThis program is distributed in the hope that it will be useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<p>\n\nTo receive a copy of the GNU General Public License write to the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA<p>\n\n\"exiftool\" is Copyright 2003-2018, Phil Harvey<br>\n This is free software; you can redistribute it and/or modify it under<br>\n the same terms as Perl itself.<p>")
+  }
+  { HBox1 HBox
+    MoveScaled(3,61,111,4)
+    { Panel4 Panel
+      MoveScaled(58,1,2,2)
+    }
+    { URLLabelGambasOne URLLabel
+      MoveScaled(63,0,14,3)
+      AutoResize = True
+      Text = ("Gambas tips")
+      Alignment = Align.Center
+      Link = "https://wordpress.gambas.one/"
+    }
+    { Panel2 Panel
+      MoveScaled(78,1,2,2)
+    }
+    { URLLabelGambasOneForum URLLabel
+      MoveScaled(81,0,14,3)
+      AutoResize = True
+      Text = ("Gambas forum")
+      Alignment = Align.Center
+      Link = "https://forum.gambas.one/"
+    }
+    { Panel1 Panel
+      MoveScaled(95,1,2,2)
+      Expand = True
+    }
+    { ButtonDone Button
+      MoveScaled(97,0,14,4)
+      Text = Shortcut(("Done"), "D")
+      Picture = Picture["icon:/22/ok"]
+    }
+  }
+}

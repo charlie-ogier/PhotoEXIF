@@ -1,0 +1,484 @@
+' Gambas class file
+
+' 14/11/19 Original release V0.1.0
+' 15/11/19 Bug when opening program in an empty folder - fixed V0.2.0
+' 16/11/19 Improved menu over EXIF, now expands to more rows if needed V0.3.0
+
+sData As String
+fHoldLat As Float
+fHoldLong As Float
+sHoldMap As String
+sHoldSearch As String[]
+sDirHold As String[]
+EXIF As EXIF
+bFirst As Boolean = True
+Public sCommon As String
+
+Public Sub Form_Open()
+
+  Dim sMap As String
+
+  Application.MainWindow = Me
+  DirChooser1.SelectedPath = Settings["path", User.Home &/ "Pictures"]
+  CheckExif
+  sDirHold = Dir(DirChooser1.SelectedPath).Sort()
+  bFirst = False
+  CheckBoxCommon.Value = Settings["common", False]
+  If FileView1.Current = "" Then
+    If sDirHold.Max <> -1 Then
+      FileView1.Current = sDirHold[0]
+    Else
+      PictureBoxMain.Picture = Picture.Load(Application.Path &/ "noimage.png")
+    End If
+  End If
+  sMap = Settings["map", "google"]
+  SetMap(sMap)
+  SliderIconSize_Change
+  HSplitMain.Layout = [20, 80]
+  HSplit3.layout = [70, 30]
+  Me.Maximized = True
+  FileView1_Click
+
+End
+
+Public Sub SetMap(sValue As String)
+
+  RadioButtongoogle.Value = False
+  RadioButtonbing.Value = False
+
+  If sValue = "google" Then RadioButtongoogle.Value = True
+  If sValue = "bing" Then RadioButtonbing.Value = True
+
+  Settings["map"] = sValue
+  sHoldMap = sValue
+
+End
+
+Public Sub DirChooser1_Change()
+
+  sData = ""
+  Settings["path"] = DirChooser1.SelectedPath
+  sDirHold = Dir(DirChooser1.SelectedPath).Sort()
+  CheckBoxCollected.Value = False
+  EXIF = New EXIF As "EXIF"
+  FileView1.Dir = DirChooser1.SelectedPath
+  FileView1.Current = ""
+  If bFirst = False Then FileView1_Click
+
+End
+
+Public Sub FileView1_Click()
+
+  Dim sDirectory, sShell, sSingle As String
+  Dim sExifArray, sPictData As New String[]
+  Dim iRow, iStart, iStop, iGPS As Integer
+
+  If Dir(DirChooser1.SelectedPath).count = 0 Then Return
+  Me.Title = "PhotoEXIF V0.3.0"
+
+  If FileView1.Current = "" Then FileView1.Current = sDirHold[0]
+
+  If sData <> "" Then
+    sDirectory = DirChooser1.SelectedPath
+    sExifArray = Split(sData, gb.NewLine, "", True)
+
+    iStart = sExifArray.Find("*" & DirChooser1.SelectedPath &/ FileView1.Current & "*", gb.like)
+
+    If iStart = -1 Then
+      PictureBoxMain.Picture = Picture.Load(Application.path &/ "noimage.png")
+      GridViewExif.Clear
+      Return
+    End If
+
+    iStop = sExifArray.Find("=======*", gb.like, iStart + 1)
+    If iStop = -1 Then iStop = sExifArray.Find("*directories scanned*", gb.like, iStart + 1)
+    sPictData = sExifArray.Copy(iStart + 1, iStop - (iStart + 2))
+  Else
+    sShell = TerminalClean(Application.Path &/ "exiftool/exiftool") & sCommon & " " &/ TerminalClean(DirChooser1.SelectedPath &/ FileView1.Current)
+    Shell sShell To sSingle
+    sSingle = Replace(sSingle, "//", "/")
+    sPictData = Split(sSingle, gb.NewLine, "", True)
+  End If
+
+  GridViewExif.Width = 50
+  HBoxSearch.Enabled = True
+
+  For iRow = 1 To sPictData.Max
+    sPictData[iRow] = ChangeSplitPoint(sPictData[iRow])
+  Next
+
+  iGps = sPictData.Find("*GPS Position*", gb.like)
+
+  If CheckBoxGPS.Value = True Then
+    If iGPS <> -1 Then
+      WebViewMap.Visible = True
+      LabelNoGPS.Visible = False
+      HBoxMap.Visible = True
+      GetDecimal(Trim(Replace(sPictData[iGPS], "GPS Position", "")))
+      VSplit1.Layout = [50, 50]
+    Else
+      WebViewMap.Visible = False
+      LabelNoGPS.Visible = True
+      HBoxMap.Visible = False
+      VSplit1.Layout = [97, 3]
+      fHoldLat = 0
+      fHoldLong = 0
+    End If
+  End If
+
+  TextBoxSearch.SetFocus
+  sHoldSearch = sPictData.Copy()
+  TextBoxSearch_Change
+  AddPicture
+
+End
+
+Public Sub AddPicture()
+
+  Dim iRotate As Integer
+  Dim sRotate As String
+  Dim iImage As Image
+
+  Try PictureBoxMain.Picture = Picture.Load(DirChooser1.SelectedPath &/ FileView1.Current)
+  If Error Then
+    PictureBoxMain.Picture = Picture.Load(Application.Path &/ "noimage.png")
+    Return
+  End If
+
+  If CheckBoxHistogram.Value = True Then Histogram(PictureBoxMain.Picture.image)
+
+  iRotate = sHoldSearch.Find("*Rotate*", gb.like)
+  If iRotate = -1 Then Return
+  If Split(Trim(Split(sHoldSearch[iRotate], "`")[1]), " ").Max < 2 Then Return
+  sRotate = Split(Trim(Split(sHoldSearch[iRotate], "`")[1]), " ")[1]
+  If IsNumber(sRotate) Then
+    iRotate = Val(sRotate)
+  Else
+    Return
+  Endif
+
+  If CheckBoxAutoRotate.value = True Then
+    iImage = PictureBoxMain.Picture.Image
+    iImage = iImage.Rotate(Rad(-iRotate))
+    PictureBoxMain.Picture = iImage.Picture
+  End If
+
+End
+
+Public Sub GetDecimal(sPOS As String)
+
+  Dim iLoop As Integer
+  Dim fLat, fLong As Float
+  Dim sDel As String[] = [Chr(34), "'", " deg", Chr(92)]
+  Dim sLat As String = Trim(Split(Split(sPOS, "`")[1])[0])
+  Dim sLong As String = Trim(Split(sPOS)[1])
+  Dim sLatArray, sLongArray As New String[]
+  Dim sMap As String = GetMap()
+
+  For iLoop = 0 To sDel.Max
+    sLat = Replace(sLat, sDel[iLoop], "")
+    sLong = Replace(sLong, sDel[iLoop], "")
+  Next
+
+  sLatArray = Split(sLat, " ")
+  sLongArray = Split(sLong, " ")
+
+  fLat = Val(sLatArray[0]) + (Val(sLatArray[1]) / 60) + (Val(sLatArray[2]) / 3600)
+  fLong = Val(sLongArray[0]) + (Val(sLongArray[1]) / 60) + (Val(sLongArray[2]) / 3600)
+
+  If InStr(sLat, "S") Then fLat = -fLat
+  If InStr(sLong, "W") Then fLong = -fLong
+
+  If fHoldLat <> fLat Or fHoldLong <> fLong Or sHoldMap <> sMap Then
+    sHoldMap = sMap
+    If RadioButtonbing.Value = True Then WebViewMap.Url = "https://www.bing.com/maps/?v=2&cp=" & Str(Round(fLat, -7)) & "~" & Str(Round(fLong, -7)) & "&lvl=18&sty=h&form=LMLTCC"
+    If RadioButtongoogle.Value = True Then WebViewMap.Url = "https://www.google.com/maps/@" & Str(Round(fLat, -7)) & "," & Str(Round(fLong, -7)) & ",18.5z/data=!3m1!1e3"
+    fHoldLat = fLat
+    fHoldLong = fLong
+  End If
+
+End
+
+Public Sub GetMap() As String
+
+  If RadioButtongoogle.Value = True Then Return "google"
+  If RadioButtonbing.Value = True Then Return "bing"
+
+End
+
+Public Sub ChangeSplitPoint(sValue As String) As String
+
+  Dim siPOS As Short
+
+  siPOS = InStr(sValue, ":")
+  Return Mid(sValue, 1, siPOS - 1) & "`" & Mid(sValue, siPOS + 1)
+
+End
+
+Public Sub ButtonsRotate_Click()
+
+  Dim iImage As Image = PictureBoxMain.Picture.Image
+
+  If Abs(Val(Last.Tag)) > 80 Then
+    iImage = iImage.Rotate(Rad(Last.Tag))
+    PictureBoxMain.Picture = iImage.Picture
+  End If
+
+End
+
+Public Sub TextBoxSearch_Change()
+
+  Dim iLoop, iRow As Integer
+
+  If sHoldSearch.count = -1 Then Return
+
+  With GridViewExif
+    .Clear
+    .Grid = False
+    .Columns.Count = 2
+    .Rows.Count = 0
+  End With
+
+  For iLoop = 1 To sHoldSearch.Max
+    If InStr(UCase(sHoldSearch[iLoop]), UCase(TextBoxSearch.Text)) > 0 Or Trim(TextBoxSearch.Text) = "" Then
+      Inc GridViewExif.Rows.Count
+      GridViewExif[iRow, 0].Text = Trim(Split(sHoldSearch[iLoop], "`")[0])
+      GridViewExif[iRow, 1].Text = Trim(Split(sHoldSearch[iLoop], "`")[1])
+      Inc iRow
+    Endif
+  Next
+
+  GridViewExif.Columns.Width = -1
+
+End
+
+Public Sub ToggleButton_Click()
+
+  If ToggleButton.value = False Then
+    ToggleButton.Text = "&Auto"
+  Else
+    ToggleButton.Text = "&Man"
+  Endif
+
+  FileView1_Click
+
+End
+
+Public Sub MenuDelete_Click()
+
+  Dim iAnswer As Integer
+
+  Message.Title = "File deletion"
+  iAnswer = Message.Question(FileView1.Current & gb.NewLine & "Are you sure you want to delete this picture?", "No", "Yes")
+
+  If iAnswer = 2 Then Kill DirChooser1.SelectedPath &/ FileView1.Current
+  FileView1.Reload
+
+End
+
+Public Sub EXIF_Kill()
+
+  sData = EXIF.Value
+  sData = Replace(sData, "//", "/")
+  If sData <> "" Then CheckBoxCollected.Value = True
+  CheckBoxCommon.enabled = True
+
+End
+
+Public Sub TerminalClean(sString As String) As String
+
+  sString = Trim(sString)
+  sString = Replace(sString, " ", Chr(92) & " ")
+  Return sString
+
+End
+
+Public Sub ToolButtonPopOut_Click()
+
+  PopOut.Show
+  PopOut.DisplayImage(PictureBoxMain.Picture.Image, FileView1.Current)
+
+End
+
+Public Sub ButtonClear_Click()
+
+  TextBoxSearch.Clear
+  TextBoxSearch.SetFocus
+
+End
+
+Public Sub Form_Close()
+
+  Settings["map"] = sHoldMap
+  Settings.Save
+  Quit
+
+End
+
+Public Sub SliderIconSize_Change()
+
+  FileView1.IconSize = SliderIconSize.Value
+
+End
+
+Public Sub CheckBoxFolder_Click()
+
+  If CheckBoxFolder.value = True Then DirChooser1.Visible = True Else DirChooser1.Visible = False
+
+End
+
+Public Sub CheckBoxEXIF_Click()
+
+  If CheckBoxEXIF.value = True Then VBoxEXIF.Visible = True Else VBoxEXIF.Visible = False
+
+End
+
+Public Sub CheckBoxGPS_Click()
+
+  If CheckBoxGPS.value = True Then
+    HBoxMap.Visible = True
+    WebViewMap.Visible = True
+    FileView1_Click
+  Else
+    WebViewMap.Visible = False
+    HBoxMap.Visible = False
+    VSplit1.Layout = [100, 0]
+  End If
+
+End
+
+Public Sub ToolButtonAbout_Click()
+
+  About.showmodal
+
+End
+
+Public Sub ToolButtonSliderDefault_Click()
+
+  SliderIconSize.Value = 100
+
+End
+
+Public Sub Maps_Click()
+
+  FileView1_Click
+
+End
+
+Public Sub CheckExif()
+
+  If Stat(Application.Path &/ "exiftool/exiftool").Auth <> "rwxr-xr-x" Then Chmod Application.Path &/ "exiftool/exiftool" To "rwxr-xr-x"
+
+End
+
+Public Sub CheckBoxCommon_Click()
+
+  If CheckBoxCommon.Value = True Then sCommon = " -common" Else sCommon = ""
+  sData = ""
+  Settings["common"] = CheckBoxCommon.Value
+  CheckBoxCollected.Value = False
+  CheckBoxCommon.enabled = False
+  EXIF = New EXIF As "EXIF"
+  If bFirst = False Then FileView1_Click
+
+End
+
+Public Sub Form_KeyPress()
+
+  Dim iCurrent As Integer = sDirHold.Find(FileView1.Current)
+
+  If key.Code = Key.Down Then
+    Inc iCurrent
+    If iCurrent > sDirHold.Max Then Return
+    FileView1.Current = sDirHold[iCurrent]
+  Endif
+
+  If key.Code = Key.Up Then
+    Dec iCurrent
+    If iCurrent < 0 Then Return
+    FileView1.Current = sDirHold[iCurrent]
+  Endif
+
+  FileView1_Click
+
+End
+
+Public Sub PictureBoxMain_MouseDown()
+
+  PopOut.Show
+  PopOut.DisplayImage(PictureBoxMain.Picture.Image, FileView1.Current)
+
+End
+
+Public Sub Histogram(iImage As Image)
+
+  Dim Hist As ImageHistogram = iImage.Histogram()
+  Dim Header As New String[]
+  Dim Red As New Integer[]
+  Dim Green As New Integer[]
+  Dim Blue As New Integer[]
+
+  For iLoop As Integer = 0 To 255
+    Header.Add(iLoop)
+    Red.Add(Hist[Image.Red, iLoop])
+    Green.Add(Hist[Image.Green, iLoop])
+    Blue.Add(Hist[Image.Blue, iLoop])
+  Next
+
+  Chart.CountDataSets = 3
+  Chart[0].Values = Red
+  Chart[1].Values = Green
+  Chart[2].values = blue
+  Chart.Headers.Values = Header
+  Chart.Type = ChartType.Areas
+  Chart.BackGround = Color.LightBackground
+
+  Chart.Colors.values = [Color.red, Color.green, Color.blue]
+  Chart.XAxe.Visible = False
+  Chart.yAxe.Visible = False
+  Chart.YAxe.ShowIntervalLines = False
+
+  Chart.Border = False
+  DrawingAreaHistogram.Refresh
+
+End
+
+Public Sub DrawingAreaHistogram_Draw()
+
+  Chart.Height = DrawingAreaHistogram.Height
+  Chart.Width = DrawingAreaHistogram.Width
+  Chart.Draw
+
+End
+
+Public Sub CheckBoxHistogram_Click()
+
+  If CheckBoxHistogram.Value = True Then
+    DrawingAreaHistogram.Visible = True
+    Histogram(PictureBoxMain.Picture.Image)
+  Else
+    DrawingAreaHistogram.Visible = False
+  Endif
+
+End
+
+Public Sub ToolButtonEditChoose_Click()
+
+  GetEditor.ShowModal
+
+End
+
+Public Sub ToolButtonEdit_Click()
+
+  Dim sShell As String
+
+  If Settings["editor"] = "" Then
+    ToolButtonEditChoose_Click
+    Return
+  End If
+
+  sShell = Settings["editor"] & " " & TerminalClean(DirChooser1.SelectedPath &/ FileView1.Current)
+  Shell sShell Wait
+  FileView1_Click
+
+End

@@ -1,0 +1,15 @@
+FMain
+PhotoEXIF
+0
+0
+0.3.0
+
+gb.image
+gb.gui.qt
+gb.form
+gb.chart
+gb.desktop
+gb.settings
+gb.gui.qt.webkit
+gb.image.effect
+

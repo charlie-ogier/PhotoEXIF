@@ -1,0 +1,277 @@
+# Gambas Form File 3.0
+
+{ Form Form
+  MoveScaled(0,0,199,65)
+  Icon = Picture["logo.png"]
+  Arrangement = Arrange.Vertical
+  Padding = 5
+  { MenuPopUp Menu
+    { MenuDelete Menu
+      Text = ("Delete")
+    }
+  }
+  { HSplitMain Splitter
+    MoveScaled(0,1,198,63)
+    Expand = True
+    { Panel3 VBox
+      MoveScaled(2,9,57,52)
+      Expand = True
+      { HSplit2 Splitter
+        MoveScaled(1,3,55,46)
+        Expand = True
+        { !DirChooser1 DirChooser
+          MoveScaled(1,8,19,29)
+          #Public = True
+          Expand = True
+        }
+        { Panel7 VBox
+          MoveScaled(21,8,33,29)
+          { Label2 Label
+            MoveScaled(3,2,25,2)
+            Font = Font["Bold,+1"]
+            Text = ("   Icon size")
+          }
+          { HBox1 HBox
+            MoveScaled(1,1,30,4)
+            { Panel9 Panel
+              MoveScaled(0,0,2,4)
+            }
+            { SliderIconSize Slider
+              MoveScaled(13,1,7,2)
+              Mouse = Cursor.Pointing
+              Expand = True
+              MinValue = 25
+              MaxValue = 300
+              Step = 25
+              PageStep = 25
+              Value = 100
+            }
+            { ToolButtonSliderDefault ToolButton
+              MoveScaled(21,0,4,4)
+              ToolTip = ("Reset slider to its default value")
+              Picture = Picture["icon:/22/revert"]
+            }
+            { Panel8 Panel
+              MoveScaled(26,1,2,2)
+            }
+          }
+          { FileView1 FileView
+            MoveScaled(1,6,31,22)
+            Expand = True
+            PopupMenu = "MenuPopUp"
+            ShowHidden = True
+            ShowPreview = True
+          }
+        }
+      }
+    }
+    { VSplit1 Splitter
+      MoveScaled(60,2,137,59)
+      Expand = True
+      Arrangement = Arrange.Vertical
+      { HSplit3 Splitter
+        MoveScaled(0,7,136,37)
+        Expand = True
+        { Panel5 VBox
+          MoveScaled(1,7,77,29)
+          { HPanelPictureControl HPanel
+            MoveScaled(1,1,76,4)
+            Mouse = Cursor.Pointing
+            AutoResize = True
+            { ToolButtonRotateL ToolButton ButtonsRotate
+              Name = "ToolButtonRotateL"
+              MoveScaled(0,0,4,4)
+              Tag = "90"
+              ToolTip = ("Rotate image 90 degrees left")
+              Picture = Picture["icon:/22/rotate-left"]
+            }
+            { ToolButtonRotateR ToolButton ButtonsRotate
+              Name = "ToolButtonRotateR"
+              MoveScaled(4,0,4,4)
+              Tag = "-90"
+              ToolTip = ("Rotate image 90 degrees right")
+              Picture = Picture["icon:/22/rotate-right"]
+            }
+            { ToolButtonEditChoose ToolButton
+              MoveScaled(9,0,4,4)
+              ToolTip = ("Choose a image editor")
+              Picture = Picture["icon:/22/select"]
+            }
+            { ToolButtonEdit ToolButton
+              MoveScaled(14,0,4,4)
+              ToolTip = ("Edit the displayed image")
+              Picture = Picture["icon:/22/edit"]
+            }
+            { ToolButtonPopOut ToolButton
+              MoveScaled(19,0,4,4)
+              Font = Font["Bold,+1"]
+              Tag = "4"
+              Tracking = True
+              ToolTip = ("Show photo in a new window")
+              Picture = Picture["icon:/22/preview"]
+            }
+            { CheckBoxFolder CheckBox
+              MoveScaled(24,0,9,4)
+              ToolTip = ("Show or hide folder view")
+              AutoResize = True
+              Text = Shortcut(("Folder"), "F")
+              Value = CheckBox.True
+            }
+            { CheckBoxEXIF CheckBox
+              MoveScaled(33,0,8,4)
+              ToolTip = ("Show or hide EXIF view")
+              AutoResize = True
+              Text = Shortcut(("EXIF"), "E")
+              Value = CheckBox.True
+            }
+            { CheckBoxGPS CheckBox
+              MoveScaled(41,0,7,4)
+              ToolTip = ("Show or hide GPS view")
+              AutoResize = True
+              Text = Shortcut(("GPS"), "G")
+              Value = CheckBox.True
+            }
+            { CheckBoxAutoRotate CheckBox
+              MoveScaled(48,0,13,4)
+              ToolTip = ("If selected this will try and auto rotate any picture that needs it.")
+              AutoResize = True
+              Text = Shortcut(("Auto rotate"), "A")
+              Value = CheckBox.True
+            }
+            { CheckBoxHistogram CheckBox
+              MoveScaled(61,0,14,4)
+              ToolTip = ("Shows a histogram of the displayed image")
+              AutoResize = True
+              Text = Shortcut(("Histogram"), "H")
+            }
+            { ToolButtonAbout ToolButton
+              MoveScaled(72,0,4,4)
+              ToolTip = ("Help and about")
+              Picture = Picture["icon:/22/help"]
+            }
+          }
+          { VSplit2 Splitter
+            MoveScaled(2,7,73,16)
+            Expand = True
+            Arrangement = Arrange.Vertical
+            { PictureBoxMain PictureBox
+              MoveScaled(13,1,57,6)
+              Mouse = Cursor.Pointing
+              ToolTip = ("Click to show in own window")
+              Expand = True
+              Padding = 10
+              Alignment = Align.Top
+              Border = Border.Plain
+              Mode = PictureBox.Contain
+            }
+            { DrawingAreaHistogram DrawingArea
+              MoveScaled(13,8,57,7)
+              Visible = False
+              Expand = True
+            }
+          }
+          { HBoxMap HBox
+            MoveScaled(2,24,73,4)
+            Visible = False
+            { Label5 Label
+              MoveScaled(-2,0,11,4)
+              Font = Font["Bold,+1"]
+              AutoResize = True
+              Alignment = Align.Right
+              Text = (" Map  ")
+            }
+            { RadioButtongoogle RadioButton Maps
+              Name = "RadioButtongoogle"
+              MoveScaled(11,0,3,4)
+              ToolTip = ("Click on the Radio button to select Google Maps")
+              Value = True
+            }
+            { PictureBox1 PictureBox
+              MoveScaled(14,0,4,4)
+              ToolTip = ("Click on the Radio button to select Google Maps")
+              Picture = Picture.Load("google.png")
+              Mode = PictureBox.Contain
+            }
+            { Panel21 Panel
+              MoveScaled(18,0,1,3)
+            }
+            { RadioButtonbing RadioButton Maps
+              Name = "RadioButtonbing"
+              MoveScaled(19,0,3,4)
+              ToolTip = ("Click on the Radio button to select Bing Maps")
+            }
+            { PictureBox3 PictureBox
+              MoveScaled(23,0,4,4)
+              ToolTip = ("Click on the Radio button to select Bing Maps")
+              Picture = Picture.Load("bing.png")
+              Mode = PictureBox.Contain
+            }
+          }
+        }
+        { VBoxEXIF VBox
+          MoveScaled(80,7,55,29)
+          Expand = True
+          { HBoxSearch HPanel
+            MoveScaled(1,1,53,4)
+            Enabled = False
+            AutoResize = True
+            { CheckBoxCommon CheckBox
+              MoveScaled(0,0,15,4)
+              ToolTip = ("Reduces the amount of data shown if selected.\nThis will disable GPS and Auto rotation features.")
+              AutoResize = True
+              Text = Shortcut(("Common data"), "C")
+            }
+            { Panel1 Panel
+              MoveScaled(16,0,1,4)
+            }
+            { Panel2 Panel
+              MoveScaled(18,0,32,4)
+              { TextBoxSearch TextBox
+                MoveScaled(8,0,16,4)
+                ToolTip = ("Enter search text to reduce the amount of data shown\ne.g. 'GPS'")
+                Expand = True
+              }
+              { ButtonClear Button
+                MoveScaled(23,0,9,4)
+                Mouse = Cursor.Pointing
+                ToolTip = ("Clears the search text")
+                Text = Shortcut(("Clear"), "C")
+                Picture = Picture["icon:/22/clear"]
+              }
+              { Label1 Label
+                MoveScaled(1,1,7,3)
+                AutoResize = True
+                Alignment = Align.Right
+                Text = ("Search")
+              }
+            }
+            { CheckBoxCollected CheckBox
+              MoveScaled(50,0,3,4)
+              Enabled = False
+              ToolTip = ("If checked then the all the EXIF data for the selected folder has been cached.\nThis produces faster responce times.")
+              AutoResize = True
+            }
+          }
+          { GridViewExif GridView
+            MoveScaled(1,6,53,21)
+            Expand = True
+            AutoResize = False
+          }
+        }
+      }
+      { VBoxWeb VBox
+        MoveScaled(1,45,135,12)
+        Expand = True
+        { WebViewMap WebView
+          MoveScaled(1,1,133,6)
+          Expand = True
+        }
+        { LabelNoGPS Label
+          MoveScaled(1,8,133,3)
+          Visible = False
+          Text = (" No GPS data found")
+        }
+      }
+    }
+  }
+}

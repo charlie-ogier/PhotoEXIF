@@ -1,0 +1,22 @@
+# Gambas Project File 3.0
+Title=PhotoEXIF
+Startup=FMain
+Icon=logo.png
+Version=0.3.0
+Component=gb.image
+Component=gb.gui.qt
+Component=gb.form
+Component=gb.chart
+Component=gb.desktop
+Component=gb.settings
+Component=gb.gui.qt.webkit
+Component=gb.image.effect
+Description="Displays photos and the EXIF data\nFeatures: Auto rotate, histogram, GPS location and various display options.\n15/11/19 Bug when opening program in an empty folder - fixed V0.2.0\n16/11/19 Improved menu over EXIF, now expands to more rows if needed V0.3.0"
+Authors="Charlie Ogier & Matt Collins 2019"
+TabSize=2
+Language=en_GB
+CreateShortcut=1
+Vendor=cogier
+Packager=1
+Tags=Photography
+CreateMenu=1

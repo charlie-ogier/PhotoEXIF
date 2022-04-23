@@ -1,0 +1,24 @@
+' Gambas class file
+
+Inherits Task
+
+Public Sub Main() As String
+
+  Dim sData, sShell As String
+  Dim sCommon As String = FMain.sCommon
+
+  sShell = TerminalClean(Application.Path &/ "exiftool/exiftool") & sCommon & " " &/ TerminalClean(FMain.DirChooser1.SelectedPath)
+  Shell sShell To sData
+
+  Return sData
+  Quit
+
+End
+
+Public Sub TerminalClean(sString As String) As String
+
+  sString = Trim(sString)
+  sString = Replace(sString, " ", Chr(92) & " ")
+  Return sString
+
+End
